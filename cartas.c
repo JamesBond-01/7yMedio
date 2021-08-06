@@ -3,80 +3,150 @@
 #include <stdlib.h>
 #include <time.h>
 
-const int TOTAL_DE_CARTAS = 40;
+//Tamaño total del mazo de cartas
+const int CARDS_STACK_SIZE = 40;
 
 /**
- *
  * Esta función crea un array de enteros de 3 dígitos usando el lugar de la centena para codificar el tipo de palo
  * (copa, oro, basto, espada) y las otras 2 posiciones restantes para el número de la carta. Así, el 101 corresponde
  * al 1 de copa, el 306 al 6 de basto y el 412 al 12 de espada.
- * 
- * Luego de crear el arreglo, se le aplica un algoritmo de aleatorización de forma tal que cada vez que se llame a esta
- * función, las cartas nunca estarán en la misma posición. 
  *
- * @return array de 40 cartas mezcladas en orden aleatorio. 
+ * Luego de crear el arreglo, se le aplica un algoritmo de aleatorización de forma tal que cada vez que se llame a esta
+ * función, las cartas nunca estarán en la misma posición.
+ *
+ * @return array de 40 cartas mezcladas (ordenadas aleatoriamente)
  */
-
-int *getMazo () {
-
-    int *mazoDeCartas = (int*) malloc(TOTAL_DE_CARTAS * sizeof (int));
+int *getCardsStack() {
+    //Como el array es modificado durante la ejecucion, llamamos a la funcion malloc() y nos devuelve un puntero.    
+    int *cardStack = (int*) malloc(CARDS_STACK_SIZE * sizeof(int)); 
     int index = 0;
-    int paloDeCarta;
-    int numeroDeCarta;
+    int cardType, cardNumber;
 
-    /**
-     *
-     * Pasamos las cartas a valores en centena, y guarda los valores en el array "mazoDeCartas" si y solo si el numero de la carta es 
-     * distinto de 8 y 9. Cuando la variable "numeroDeCarta" es igual a 8 o 9, ignora la instruccion de guardarse en el array y continua 
-     * con la siguiente iteracion del for.
-     * 
-     */
+    for (cardType = 1; cardType <= 4; ++cardType) {
+        for (cardNumber = 1; cardNumber <= 12; ++cardNumber) {
+            if (cardNumber == 8 || cardNumber == 9) {
+                continue;
+            }
 
-    for (paloDeCarta = 1; paloDeCarta <= 4; ++paloDeCarta) {
-        
-        for (numeroDeCarta = 1; numeroDeCarta <= 12; ++numeroDeCarta) {
-
-            if (numeroDeCarta == 8 || numeroDeCarta == 9)
-            continue; 
-
+            cardStack[index] = cardType * 100 + cardNumber;
+            index++;
         }
-
-        mazoDeCartas[index] = paloDeCarta * 100 + numeroDeCarta;
-        index ++;
-
     }
 
-    /**
+    /** 
+     * Para mezclar las cartas, utilizamos el siguiente algoritmo de shuffle que consiste en cambiar de posicion los valores  
+     * dentro del array de forma totalmente aleatoria.
      * 
-     * Para aleatorizar las cartas, utilizamos el siguiente algoritmo que consiste en cambiar de posicion los valores dentro del array de
-     * forma totalmente aleatoria.
+     * Para que cada vez que se ejecute el programa las cartas no nos queden ordenadas de la misma forma que la ejecucion  
+     * anterior, llamamos a la funcion srand() de tal manera que cada vez que se tenga que mezclar, genere otro valor 
+     * inicial (semilla). De esta forma, nos aseguramos que nunca se va a repetir el orden por cada ejecucion del programa.
      * 
-     * Para que cada vez que se ejecute el programa no nos quede ordenado con la misma secuencia que la ejecucion anterior, 
-     * llamamos a la funcion "srand ()" de tal manera que cada vez que tenga que mezclar, genere otro valor inicial (semilla).
-     * De esta forma, nos aseguramos que nunca se va a repetir el orden por cada ejecucion que tenga el programa.
-     * 
+     * Nota:
+     * Algoritmo de shuffle original de Ben Pfaff:
+     * https://benpfaff.org/writings/clc/shuffle.html
      */
-
-    srand(time(NULL)); 
-    size_t i;
-
-    for (i = 0; i < TOTAL_DE_CARTAS - 1; i++) {
-        
-        size_t j = i + rand() / (RAND_MAX / (TOTAL_DE_CARTAS - i) + 1);
-        int t = mazoDeCartas[j];
-        mazoDeCartas[j] = mazoDeCartas[i];
-        mazoDeCartas[i] = t;
-
+    srand(time(NULL));
+    int i;
+    for (i = 0; i < CARDS_STACK_SIZE - 1; i++) {
+        int j = i + rand() / (RAND_MAX / (CARDS_STACK_SIZE - i) + 1);
+        int t = cardStack[j];
+        cardStack[j] = cardStack[i];
+        cardStack[i] = t;
     }
 
-    return mazoDeCartas;
-
+    return cardStack;
 }
 
 /**
- * 
- * Creamos una funcion 
- *  
-*/
+ * Recorremos el mazo de cartas desde la última posición hasta la primera. Cuando encontramos una carta que no tenga un
+ * 0 en su posición asignamos un 0 a su posición y la devolvemos. De esta forma, la próxima vez que se llame a la
+ * función, dicha carta no estará mas disponible.
+ *
+ * Nota:
+ * Se hace de esta forma y no al revés porque por algún motivo el algoritmo de shuffle en getCardsStack() devuelve
+ * durante un mismo minuto la misma primer carta. Sospechamos que esto se debe a la funcion srand() o rand().
+ *
+ * @param cardStack array de 40 cartas
+ * @return carta elegida
+ */
+int popCard(int *cardStack) {
+    size_t i;
+    for (i = CARDS_STACK_SIZE - 1; i >= 0; i--) {
+        if (cardStack[i] == 0) {
+            continue;
+        }
 
-int 
+        int card = cardStack[i];
+        cardStack[i] = 0;
+        return card;
+    }
+
+    return 0;
+}
+
+/**
+ * @param card la carta de la cual queremos obtener su tipo
+ * @return el tipo de carta de forma numeral, por ej.: 1 representa Copa, 2 Oro, 3 Basto y 4 Espada
+ */
+int getCardType(int card) {
+    return (int) (card / 100);
+}
+
+/**
+ * @param card la carta de la cual queremos obtener su número
+ * @return el número de la carta
+ */
+int getCardNumber(int card) {
+    return (card - getCardType(card) * 100);
+}
+
+/**
+ * @param card la carta de la cual queremos obtener su representación literal
+ * @return una representación literal de la carta, por ej.: 9 de Copa
+ */
+char *getCardString(int card) {
+    int cardNumber = getCardNumber(card);
+    int cardType = getCardType(card);
+    char *cardTypeString;
+    switch (cardType) {
+        case 1:
+            cardTypeString = "Copa";
+            break;
+        case 2:
+            cardTypeString = "Oro";
+            break;
+        case 3:
+            cardTypeString = "Basto";
+            break;
+        case 4:
+            cardTypeString = "Espada";
+            break;
+        default:
+            printf("Error en la generación de cartas: tipo no reconocido: %i", cardType);
+            cardTypeString = "No reconocido";
+    }
+
+    // 12 es el número total que puede tener la cadena de texto más larga, ej: 12 de Espada
+    // Pero con 12 había casos donde se imprimía basura. Agregando uno mas se arregló.
+    size_t size = 13 * sizeof(char);
+    char *cardString = (char*) malloc(size);
+    snprintf(cardString, size, "%i de %s", cardNumber, cardTypeString);
+
+    return cardString;
+}
+
+/**
+ * Las cartas valen tantos puntos como su valor numérico indica, por ejemplo, el “4 de copas” vale 4, el “7 de oros”
+ * vale 7. “el 1 de bastos” vale 1 y así, la excepción a esto son las figuras (sota(10), caballo(11), rey(12)) que valen
+ * medio punto.
+ * 
+ * @param card la carta de la cual queremos obtener su valor
+ * @return 0.5 si la carta es 10, 11 o 12, de otra forma devuelve el valor intrínseco de la carta.
+ */
+double getCardPoints(int card) {
+    int cardNumber = getCardNumber(card);
+    if (cardNumber == 10 || cardNumber == 11 || cardNumber == 12) {
+        return 0.5;
+    }
+    return cardNumber;
+}

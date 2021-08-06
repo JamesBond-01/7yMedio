@@ -1,7 +1,18 @@
-#ifndef SIETE_Y_MEDIO_CARTAS_H
-#define SIETE_Y_MEDIO_CARTAS_H
+#ifndef SIETE_Y_MEDIO_CARDS_H
+#define SIETE_Y_MEDIO_CARDS_H
 
-int *getMazo ();
+int *getCardsStack();
 
+int popCard(int *cardStack);
 
-#endif //SIETE_Y_MEDIO_CARTAS_H
+int getCardType(int card);
+
+int getCardNumber(int card);
+
+char *getCardString(int card);
+
+double getCardPoints(int card);
+
+void shuffle(int *array, int n);
+
+#endif //SIETE_Y_MEDIO_CARDS_H
