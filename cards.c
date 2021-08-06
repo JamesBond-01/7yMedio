@@ -32,19 +32,18 @@ int *getCardsStack() {
             index++;
         }
     }
-
-    /** 
-     * Para mezclar las cartas, utilizamos el siguiente algoritmo de shuffle que consiste en cambiar de posicion los valores  
-     * dentro del array de forma totalmente aleatoria.
-     * 
-     * Para que cada vez que se ejecute el programa las cartas no nos queden ordenadas de la misma forma que la ejecucion  
-     * anterior, llamamos a la funcion srand() de tal manera que cada vez que se tenga que mezclar, genere otro valor 
-     * inicial (semilla). De esta forma, nos aseguramos que nunca se va a repetir el orden por cada ejecucion del programa.
-     * 
-     * Nota:
-     * Algoritmo de shuffle original de Ben Pfaff:
-     * https://benpfaff.org/writings/clc/shuffle.html
-     */
+  
+    // Para mezclar las cartas, utilizamos el siguiente algoritmo de shuffle que consiste en cambiar de posicion los valores  
+    // dentro del array de forma totalmente aleatoria.
+    // 
+    // Para que cada vez que se ejecute el programa las cartas no nos queden ordenadas de la misma forma que la ejecucion  
+    // anterior, llamamos a la funcion srand() de tal manera que cada vez que se tenga que mezclar, genere otro valor 
+    // inicial (semilla). De esta forma, nos aseguramos que nunca se va a repetir el orden por cada ejecucion del programa.
+    // 
+    // Nota:
+    // Algoritmo de shuffle original de Ben Pfaff:
+    // https://benpfaff.org/writings/clc/shuffle.html
+    
     srand(time(NULL));
     int i;
     for (i = 0; i < CARDS_STACK_SIZE - 1; i++) {
