@@ -1,12 +1,18 @@
 #include <cards.h>
 #include <stdio.h>
+#include <malloc.h>
+#include <stdlib.h>
+#include <time.h>
 
 int main () {
-
-    // Monto con el que empieza la banca.
-    int banksWallet = 100000;
-    int cards, points, players, rounds;
-    int *cardStack[40];
+    const int CARDS_STACK_SIZE = 40;     // Tamaño total del mazo de cartas.
+    const int MIN_BET = 100;            // Cantidad minima permitida para apostar.
+    const int MAX_BET = 1500;           // Cantidad minima permitida para apostar.    
+    
+    int banksWallet = 100000;           // Monto con el que empieza la banca.
+    int card, points, players, rounds;
+    int cardStack[CARDS_STACK_SIZE];     // Array que contiene el mazo de cartas.
+ 
 
     printf ("\n=================================");
     printf ("\nBienvenido al juego Siete y Medio");
@@ -22,15 +28,13 @@ int main () {
         scanf ("%d", &players);
     }
 
-    // Billetera donde se almacena el dinero de cada jugador.
-    int playersWallets[players];  
-    // Array que contiene la apuesta que hace cada jugador por ronda.
-    int playersBet[players];
-    size_t i, j;
+    int playersWallet[players];     // Billetera donde se almacena el dinero de cada jugador.
+    int playersBet[players];        // Array que contiene la apuesta que hace cada jugador por ronda.
+    size_t i, j, r1, r2, temp;
 
-    //Le asignamos a cada jugador su monto inicial ($5000).
+    // Le asignamos a cada jugador su monto inicial ($5000).
     for (i = 0; i <= players - 1; i++) {
-        playersWallets[i] = 5000;
+        playersWallet[i] = 5000; 
     }
 
     printf ("\nCantidad de rondas de duracion de la partida [2 - 4]: ");
@@ -41,25 +45,48 @@ int main () {
         scanf ("%d", &rounds);
     }
 
-    for (i = 1; i <= rounds; i++) {
-    // Llamamos a la funcion getCardsStack() para obtener el mazo de 40 cartas, mezcladas aleatoriamente
-    // por cada ronda.
-    *getCardsStack();
-
-        for (j = 0; j <= players - 1; j++) {
-            printf ("\nJugador %d, ingrese el monto que desee apostar [$150 - $1500]: ", (j+1));
-            scanf ("%d", &playersBet[j]);
-
-            while (playersBet[j] < 150 || playersBet[j] > 1500) {
-                printf ("\nPor favor, ingrese un valor correcto [$150 - $1500]: ");
-                scanf ("%d", &playersBet[j]);  
+    //genero maso
+    int index = 0;
+    int cardType, cardNumber;
+    for (cardType = 1; cardType <= 4; ++cardType) {
+        for (cardNumber = 1; cardNumber <= 12; ++cardNumber) {
+            if (cardNumber == 8 || cardNumber == 9) {
+                continue;
             }
-            playersWallets[j] = playersWallets[j] - playersBet[j];
+            cardStack[index] = cardType * 100 + cardNumber;
+            index++;
+        }
+    }
 
-            popCard(*cardStack);
+    // Inicio ronda
+    for (i = 1; i <= rounds; i++) {
+        //mezclo mazo
+        srand(time(NULL));
+        for (j = 1; j <= 100; j++) {
+            r1 = rand() % 40;
+            r2 = rand() % 40;
+            temp = cardStack[r1];      
+            cardStack[r1] = cardStack[r2];
+            cardStack[r2] = temp;
         }
 
-    }
-    
-    return 0;
+        //inicio apuestas
+        for (j = 0; j <= players - 1; j++) {
+
+            printf ("\nApuesta jugador %d [%d - %d]: ", (j+1), MIN_BET, MAX_BET);
+            scanf ("%d", &playersBet[j]);
+
+            while (playersBet[j] < MIN_BET || playersBet[j] > MAX_BET) {
+                printf ("\nApuesta valida entre %d - %d: ", MIN_BET, MAX_BET);
+                scanf ("%d", &playersBet[j]);  
+            }
+            playersWallet[j] = playersWallet[j] - playersBet[j];
+
+            printf("\nRonda %d, jugador %d aposto %d, saldo %d",i, j+1, playersBet[j], playersWallet[j]);
+
+        } //fin apuestas
+
+    } //fin ronda 
+
+    return 0;   
 }
