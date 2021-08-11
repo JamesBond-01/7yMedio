@@ -17,7 +17,7 @@ const int CARDS_STACK_SIZE = 40;
  * @return array de 40 cartas mezcladas (ordenadas aleatoriamente)
  */
 int *getCardsStack() {
-    //Como el array es modificado durante la ejecucion, llamamos a la funcion malloc() y nos devuelve un puntero.    
+    //La funcion malloc() nos devuelve un puntero para el array cardStack.    
     int *cardStack = (int*) malloc(CARDS_STACK_SIZE * sizeof(int)); 
     int index = 0;
     int cardType, cardNumber;
@@ -48,9 +48,9 @@ int *getCardsStack() {
     int i;
     for (i = 0; i < CARDS_STACK_SIZE - 1; i++) {
         int j = i + rand() / (RAND_MAX / (CARDS_STACK_SIZE - i) + 1);
-        int t = cardStack[j];
+        int temp = cardStack[j];
         cardStack[j] = cardStack[i];
-        cardStack[i] = t;
+        cardStack[i] = temp;
     }
 
     return cardStack;
