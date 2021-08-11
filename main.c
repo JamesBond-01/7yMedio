@@ -1,22 +1,21 @@
 #include "cards.h"
 #include "inputs.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdbool.h>
 
 int main() {   
     const int MIN_PLAYERS = 1;          // Cantidad minima permitida de jugadores.
     const int MAX_PLAYERS = 5;          // Cantidad maxima permitida de jugadores.
     const int MIN_ROUNDS = 2;           // Cantidad minima permitida de rondas.
     const int MAX_ROUNDS = 4;           // Cantidad maxima permitida de rondas.
-    const int MIN_BET = 100;            // Cantidad minima permitida de apuestas.
-    const int MAX_BET = 1500;           // Cantidad maxima permitida de apuestas.
+    const double MIN_BET = 100;            // Cantidad minima permitida de apuestas.
+    const double MAX_BET = 1500;           // Cantidad maxima permitida de apuestas.
 
 
-    int banksWallet = 100000;           // Monto con el que empieza la banca.
-    int card, players, rounds, bet, maxBet;
-    double cardPoints;
-    char option;
+    double banksWallet = 100000;        // Monto con el que empieza la banca.
+    int card, players, rounds, currentCard;
+    double cardPoints, bet, maxBet;
+    bool option, secondCardPopped;             //Variable para que el usuario opte por
  
 
     printf("\n##################################");
@@ -26,96 +25,133 @@ int main() {
     printf("\nPara comenzar, por favor ingrese los siguientes datos:\n");
 
 
-    players = getUserInput("Cantidad de jugadores con los que desee jugar", MIN_PLAYERS, MAX_PLAYERS ); 
+    players = getUserInputAsInt("Cantidad de jugadores con los que desee jugar", MIN_PLAYERS, MAX_PLAYERS ); 
 
     double playerPoints[players];
-    int playersWallet[players];     // Billetera donde se almacena el dinero de cada jugador.
-    int playersBet[players];        // Array que contiene la apuesta que hace cada jugador por ronda.
-    int i, j, p;                    //Contadores.
+    double playersWallet[players];  // Billetera donde se almacena el dinero de cada jugador.
+    double playersBet[players];     // Array que contiene la apuesta que hace cada jugador por ronda.
 
     // Le asignamos a cada jugador su monto inicial ($5000).
-    for (i = 0; i < players; i++) {
-        playersWallet[i] = 5000; 
+    for (int playerNumber = 0; playerNumber < players; playerNumber++) {
+        playersWallet[playerNumber] = 5000;
     }
 
-    rounds = getUserInput("Cantidad de rondas que dura la partida", MIN_ROUNDS, MAX_ROUNDS);
+    rounds = getUserInputAsInt("Cantidad de rondas que dura la partida", MIN_ROUNDS, MAX_ROUNDS);
 
-    for (i = 1; i <= rounds; i++) {
+    for (int roundNumber = 1; roundNumber <= rounds; roundNumber++) {
 
         int *cardStack = getCardsStack();   // Genero el array de cartas mezclado aleatoriamente.
         printf("\n\t========");
-        printf("\n\tRonda %d\n", i);
+        printf("\n\tRonda %d\n", roundNumber);
         printf("\t========");
         
-        for (j = 0; j < players ; j++) {
+        for (int playerNumber = 0; playerNumber < players ; playerNumber++) {
 
             /** 
-             * Elijo una carta aleatoria y en su posicion dentro del array lo reemplazo por un 0 
+             * Elijo una carta aleatoria y en su posición dentro del array lo reemplazo por un 0
              * para que no vuelva a aparecer en la ronda. 
              */ 
-            card = popCard(cardStack);      
+            card = popCard(cardStack);
+            playerPoints[playerNumber] = getCardPoints(card);
 
             //Si a un jugador le queda menos dinero que el minimo que se puede apostar, no puede jugar mas.
-            if (playersWallet[j] < MIN_BET) {
-                printf("Usted no posee saldo suficiente para apostar y en consecuencia no podra seguir jugando.");
+            if (playersWallet[playerNumber] < MIN_BET) {
+                printf("Usted no posee saldo suficiente para apostar y en consecuencia no puede seguir jugando.");
                 continue;
             }
+
+            printf("\n***** Turno del jugador %d *****.", playerNumber + 1);
+            printf("\nCarta recibida: %s", getCardString(card));
             
-            maxBet = MAX_BET <= playersWallet[j] 
+            // Elegimos el minimo valor entre el maximo permitido de apuesta (1500) y el saldo en la billetera del jugador.  
+            // El objetivo es mostrar en pantalla el maximo limite de apuesta. 
+            maxBet = MAX_BET <= playersWallet[playerNumber]
                              ? MAX_BET 
-                             : playersWallet[j];
-            printf("\n*****Turno del jugador %d*****.", j+1);
-            printf("\nHa recibido el %s.", getCardString(card));
+                             : playersWallet[playerNumber];
+            bet = getUserInputAsDouble("Ingrese su apuesta $", MIN_BET, maxBet);
 
-            char numPly[25];
-            sprintf(numPly,"Ingrese su apuesta");
-            bet = getUserInput(numPly, MIN_BET, maxBet);  
+            playersBet[playerNumber] = bet;
 
-            playersBet[j] = bet; 
+            playersWallet[playerNumber] = playersWallet[playerNumber] - bet;
+            printf("\t(Saldo %.2f)", playersWallet[playerNumber]);
+            printf("\nPuntaje de la carta: %lf", playerPoints[playerNumber]);
 
-            playersWallet[j] = playersWallet[j] - bet;
-            printf("\t(Saldo %d)\n", playersWallet[j]);
+            secondCardPopped = true;
+            do {
+                option = getUserInputAsBool("\nDesea pedir otra carta?");
+                if (option) {
+                    currentCard = popCard(cardStack);
+                    playerPoints[playerNumber] += getCardPoints(currentCard);
 
-           cardPoints = getCardPoints(card); 
-           printf("\tPuntaje de la carta: %lf", cardPoints);
+                    printf("\nCarta recibida: %s", getCardString(currentCard));
 
-           do{
-                printf("\nDesea pedir otra carta? [y/n]: ");
-                scanf(" %c", &option);
+                    // Reglas para 2 cartas únicamente
+                    if (secondCardPopped) {
+                        secondCardPopped = false;
 
-                if (option == 'y' || option == 'Y') {
-                    card = popCard(cardStack);      
-                    printf("\nHa recibido el %s.", getCardString(card));
-                    cardPoints = cardPoints + getCardPoints(card); 
-                    printf("\n\tLleva acumulado %lf puntos.", cardPoints);
+                        int cardType1 = getCardType(card);
+                        int cardType2 = getCardType(currentCard);
+                        int cardNum1 = getCardNumber(card);
+                        int cardNum2 = getCardNumber(currentCard);
 
-                    if (cardPoints > 7.5) {
-                        printf("\nUsted perdio la ronda. Ha superado 7.5 :(\n");
-                        banksWallet = banksWallet + bet;
+                        if (playerPoints[playerNumber] == 7.5) {
+                            //Gana con: 7 + figura (palo oro y figura rey), premio 100% de lo apostado.
+                            if ((cardType1 == 2 && cardType2 == 2) && (cardNum1 == 12 || cardNum2 == 12)) {
+                                playersWallet[playerNumber] += bet;
+
+                            }
+                            //Gana con: 7 + figura, del mismo palo, premio 75% de lo apostado
+                            else if (cardType1 == cardType2) {
+                                playersWallet[playerNumber] += bet * 0.75;
+                            }
+                            //Gana con: 7 + figura, el premio es 50% de lo apostado
+                            else {
+                                playersWallet[playerNumber] += bet * 0.50;
+
+                            }
+
+                            printf("\nUsted gana solo con 2 cartas !");
+                            printf ("\nJugador %d tiene $%.2f", playerNumber + 1, playersWallet[playerNumber]);
+                            break;
+                        }
+                    }
+
+                    // Reglas para 3 o más cartas, en caso de que llegue a conseguir 7.50 puntos exactamente
+                    if (playerPoints[playerNumber] == 7.5){
+                        printf("\nUsted gana !");
+                        playersWallet[playerNumber] += bet * 0.25;
+                        printf ("\nJugador %d tiene $%.2f", playerNumber + 1, playersWallet[playerNumber]);
                         break;
                     }
+
+                    // Si se pasa de 7.5 pierde la apuesta
+                    if (playerPoints[playerNumber] > 7.5) {
+                        printf("\nUsted pierde la ronda. Ha superado 7.5. Total de puntos: %.2f\n", playerPoints[playerNumber]);
+                        printf ("\nJugador %d tiene $%.2f", playerNumber + 1, playersWallet[playerNumber]);
+                        banksWallet += bet;
+                        break;
+                    }
+
+                    printf ("\nJugador %d tiene %.2f puntos", playerNumber + 1, playerPoints[playerNumber]);
                 }
-
-            } while (option == 'y' || option == 'Y');
-
-            playerPoints[j] = cardPoints; 
+            } while (option);
         }
 
-        printf("\n*****Turno de la banca*****");
-        card = popCard(cardStack);      
-        printf("\nLa banca recibe el %s.", getCardString(card));
+        printf("\n\n ***** Turno de la banca ***** ");
+        card = popCard(cardStack);
         cardPoints = getCardPoints(card);
+        printf("\nLa banca recibe el %s", getCardString(card));
 
         while (cardPoints <= 5.5) {
-            card = popCard(cardStack);      
+            card = popCard(cardStack);
             printf("\nLa banca pide otra carta y recibe el %s.", getCardString(card));
-            cardPoints = cardPoints + getCardPoints(card);
+            cardPoints += getCardPoints(card);
         } 
         
         if (cardPoints > 7.5) {
             printf("\nLa banca pierde: ha superado 7.5 puntos. Ganan los jugadores!\n");
-            for (p = 1; p < players; p++) {
-                playersWallet[p] = playersWallet[p] + playersBet[p];
+            for (int p = 0; p < players; p++) {
+                playersWallet[p] += playersBet[p];
             break;
             }
         }

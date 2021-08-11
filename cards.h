@@ -13,6 +13,4 @@ char *getCardString(int card);
 
 double getCardPoints(int card);
 
-void shuffle(int *array, int n);
-
 #endif //SIETE_Y_MEDIO_CARDS_H

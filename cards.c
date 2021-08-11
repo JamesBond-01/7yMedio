@@ -39,19 +39,16 @@ int *getCardsStack() {
     // Para que cada vez que se ejecute el programa las cartas no nos queden ordenadas de la misma forma que la ejecucion  
     // anterior, llamamos a la funcion srand() de tal manera que cada vez que se tenga que mezclar, genere otro valor 
     // inicial (semilla). De esta forma, nos aseguramos que nunca se va a repetir el orden por cada ejecucion del programa.
-    // 
-    // Nota:
-    // Algoritmo de shuffle original de Ben Pfaff:
-    // https://benpfaff.org/writings/clc/shuffle.html
     
     srand(time(NULL));
-    int i;
-    for (i = 0; i < CARDS_STACK_SIZE - 1; i++) {
-        int j = i + rand() / (RAND_MAX / (CARDS_STACK_SIZE - i) + 1);
-        int temp = cardStack[j];
-        cardStack[j] = cardStack[i];
-        cardStack[i] = temp;
-    }
+    int j, r1, r2, temp;
+    for (j = 1; j <= 100; j++) {
+            r1 = rand() % 40;
+            r2 = rand() % 40;
+            temp = cardStack[r1];      
+            cardStack[r1] = cardStack[r2];
+            cardStack[r2] = temp;
+        }
 
     return cardStack;
 }
