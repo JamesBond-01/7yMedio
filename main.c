@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-int main() {   
+int main() {
     const int MIN_PLAYERS = 1;          // Cantidad minima permitida de jugadores.
     const int MAX_PLAYERS = 5;          // Cantidad maxima permitida de jugadores.
     const int MIN_ROUNDS = 2;           // Cantidad minima permitida de rondas.
@@ -15,8 +15,8 @@ int main() {
     double benchWallet = 100000;        // Monto con el que empieza la banca.
     int card, players, rounds, currentCard;
     double benchPoints, bet, maxBet;
-    bool option, secondCardPopped;             //Variable para que el usuario opte por
- 
+    bool option, secondCardPopped;
+
 
     printf("\n##################################");
     printf("\nBienvenido al juego Siete y Medio");
@@ -25,12 +25,12 @@ int main() {
     printf("\nPara comenzar, por favor ingrese los siguientes datos:\n");
 
 
-    players = getUserInputAsInt("Cantidad de jugadores con los que desee jugar", MIN_PLAYERS, MAX_PLAYERS ); 
+    players = getUserInputAsInt("Cantidad de jugadores con los que desee jugar", MIN_PLAYERS, MAX_PLAYERS );
 
     double playerPoints[players];
     double playersWallet[players];  // Billetera donde se almacena el dinero de cada jugador.
     double playersBet[players];     // Array que contiene la apuesta que hace cada jugador por ronda.
-    double playerGainRatio[players] // Array que contiene el porcentaje de ganancia por sobre la apuesta. 
+    double playerGainRatio[players]; // Array que contiene el porcentaje de ganancia por sobre la apuesta.
 
     int playerNumber;
     // Le asignamos a cada jugador su monto inicial ($5000).
@@ -46,13 +46,13 @@ int main() {
         printf("\n\t========");
         printf("\n\tRonda %d\n", roundNumber);
         printf("\t========");
-        
+
         for (playerNumber = 0; playerNumber < players ; playerNumber++) {
 
-            /** 
-             * Elijo una carta aleatoria y en su posición dentro del array lo reemplazo por un 0
-             * para que no vuelva a aparecer en la ronda. 
-             */ 
+            /**
+             * Elijo una carta aleatoria y en su posicion dentro del array lo reemplazo por un 0
+             * para que no vuelva a aparecer en la ronda.
+             */
             card = popCard(cardStack);
             playerPoints[playerNumber] = getCardPoints(card);
 
@@ -64,11 +64,11 @@ int main() {
 
             printf("\n***** Turno del jugador %d *****.", playerNumber + 1);
             printf("\nCarta recibida: %s", getCardString(card));
-            
-            // Elegimos el minimo valor entre el maximo permitido de apuesta (1500) y el saldo en la billetera del jugador.  
-            // El objetivo es mostrar en pantalla el maximo limite de apuesta. 
+
+            // Elegimos el minimo valor entre el maximo permitido de apuesta (1500) y el saldo en la billetera del jugador.
+            // El objetivo es mostrar en pantalla el maximo limite de apuesta.
             maxBet = MAX_BET <= playersWallet[playerNumber]
-                             ? MAX_BET 
+                             ? MAX_BET
                              : playersWallet[playerNumber];
             bet = getUserInputAsDouble("Ingrese su apuesta $", MIN_BET, maxBet);
 
@@ -79,7 +79,7 @@ int main() {
             printf("\nPuntaje de la carta: %lf", playerPoints[playerNumber]);
 
             secondCardPopped = true;
-            playerGainRatio[playerNumber] = 1; // Valor por defecto en caso de que no gane. 
+            playerGainRatio[playerNumber] = 1; // Valor por defecto en caso de que no gane.
             do {
                 option = getUserInputAsBool("\nDesea pedir otra carta?");
                 if (option) {
@@ -88,7 +88,7 @@ int main() {
 
                     printf("\nCarta recibida: %s", getCardString(currentCard));
 
-                    // Reglas para 2 cartas únicamente
+                    // Reglas para 2 cartas unicamente
                     if (secondCardPopped) {
                         secondCardPopped = false;
 
@@ -119,7 +119,7 @@ int main() {
                         }
                     }
 
-                    // Reglas para 3 o más cartas, en caso de que llegue a conseguir 7.50 puntos exactamente
+                    //Reglas para 3 o mas cartas, en caso de que llegue a conseguir 7.50 puntos exactamente
                     if (playerPoints[playerNumber] == 7.5){
                         printf("\nUsted gana !");
                         playerGainRatio[playerNumber] = 1.25;
@@ -127,7 +127,7 @@ int main() {
                         break;
                     }
 
-                    // Si se pasa de 7.5 pierde la apuesta
+                    //Si se pasa de 7.5 pierde la apuesta
                     if (playerPoints[playerNumber] > 7.5) {
                         printf("\nUsted pierde la ronda. Ha superado 7.5. Total de puntos: %.2f\n", playerPoints[playerNumber]);
                         printf ("\nJugador %d tiene $%.2f", playerNumber + 1, playersWallet[playerNumber]);
@@ -149,8 +149,8 @@ int main() {
             card = popCard(cardStack);
             printf("\nLa banca pide otra carta y recibe el %s.", getCardString(card));
             benchPoints += getCardPoints(card);
-        } 
-        
+        }
+
         if (benchPoints > 7.5) {
             printf("\nLa banca pierde: ha superado 7.5 puntos. Ganan los jugadores!\n");
             for (int p = 0; p < players; p++) {
@@ -159,9 +159,9 @@ int main() {
             }
         }
         else if (benchPoints >= 6 && benchPoints <= 7.5) {
-            printf("\nLa banca se planta. Ha acumulado %lf puntos.", benchPoints); 
-        }        
-            
+            printf("\nLa banca se planta. Ha acumulado %lf puntos.", benchPoints);
+        }
+
         int counter1, counter2, swap_points, swap_playerNumber;
         int playersPointsAndNumber[players][2];
 
@@ -172,8 +172,8 @@ int main() {
 
         /**
          * Algoritmo de ordenamiento "Metodo Burbuja" adaptado a nuestro
-         *   
-         */  
+         *
+         */
 
         for (counter1 = 0; counter1 < players - 1; counter1++) {
             for (counter2 = 0; counter2 < players - counter1 - 1; counter2++) {
@@ -188,13 +188,13 @@ int main() {
             }
         }
 
-    // Comparar la banca contra la primera posicion. Si gana la banca se finaliza la ronda. 
+    // Comparar la banca contra la primera posicion. Si gana la banca se finaliza la ronda.
     // Si esto no pasa, se compara el primero con el segundo para ver si hay empate.
     // Si no hay empate, gana el primero. Sino, se compara el puntaje del segundo contra el tercero para ver si no hubo un empate triple.
 
-    } 
+    }
 
-    return 0;   
+    return 0;
 }
 
 
