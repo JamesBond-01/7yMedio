@@ -17,8 +17,8 @@ const int CARDS_STACK_SIZE = 40;
  * @return array de 40 cartas mezcladas (ordenadas aleatoriamente)
  */
 int *getCardsStack() {
-    //La funcion malloc() nos devuelve un puntero para el array cardStack.    
-    int *cardStack = (int*) malloc(CARDS_STACK_SIZE * sizeof(int)); 
+    //La funcion malloc() nos devuelve un puntero para el array cardStack.
+    int *cardStack = (int*) malloc(CARDS_STACK_SIZE * sizeof(int));
     int index = 0;
     int cardType, cardNumber;
 
@@ -32,20 +32,20 @@ int *getCardsStack() {
             index++;
         }
     }
-  
-    // Para mezclar las cartas, utilizamos el siguiente algoritmo de shuffle que consiste en cambiar de posicion los valores  
+
+    // Para mezclar las cartas, utilizamos el siguiente algoritmo de shuffle que consiste en cambiar de posicion los valores
     // dentro del array de forma totalmente aleatoria.
-    // 
-    // Para que cada vez que se ejecute el programa las cartas no nos queden ordenadas de la misma forma que la ejecucion  
-    // anterior, llamamos a la funcion srand() de tal manera que cada vez que se tenga que mezclar, genere otro valor 
+    //
+    // Para que cada vez que se ejecute el programa las cartas no nos queden ordenadas de la misma forma que la ejecucion
+    // anterior, llamamos a la funcion srand() de tal manera que cada vez que se tenga que mezclar, genere otro valor
     // inicial (semilla). De esta forma, nos aseguramos que nunca se va a repetir el orden por cada ejecucion del programa.
-    
+
     srand(time(NULL));
     int j, r1, r2, temp;
     for (j = 1; j <= 100; j++) {
             r1 = rand() % 40;
             r2 = rand() % 40;
-            temp = cardStack[r1];      
+            temp = cardStack[r1];
             cardStack[r1] = cardStack[r2];
             cardStack[r2] = temp;
         }
@@ -135,7 +135,7 @@ char *getCardString(int card) {
  * Las cartas valen tantos puntos como su valor numérico indica, por ejemplo, el “4 de copas” vale 4, el “7 de oros”
  * vale 7. “el 1 de bastos” vale 1 y así, la excepción a esto son las figuras (sota(10), caballo(11), rey(12)) que valen
  * medio punto.
- * 
+ *
  * @param card la carta de la cual queremos obtener su valor
  * @return 0.5 si la carta es 10, 11 o 12, de otra forma devuelve el valor intrínseco de la carta.
  */
