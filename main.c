@@ -4,15 +4,15 @@
 #include <stdbool.h>
 
 int main() {
-	const int MIN_PLAYERS = 1;          //Cantidad minima permitida de jugadores.
-	const int MAX_PLAYERS = 5;          //Cantidad maxima permitida de jugadores.
-	const int MIN_ROUNDS = 2;           //Cantidad minima permitida de rondas.
-	const int MAX_ROUNDS = 4;           //Cantidad maxima permitida de rondas.
-	const double MIN_BET = 100;         //Cantidad minima permitida de apuestas.
-	const double MAX_BET = 1500;        //Cantidad maxima permitida de apuestas.
+	const int MIN_PLAYERS = 1;	//Cantidad minima permitida de jugadores.
+	const int MAX_PLAYERS = 5;	//Cantidad maxima permitida de jugadores.
+	const int MIN_ROUNDS = 2;	//Cantidad minima permitida de rondas.
+	const int MAX_ROUNDS = 4;	//Cantidad maxima permitida de rondas.
+	const double MIN_BET = 100;	//Cantidad minima permitida de apuestas.
+	const double MAX_BET = 1500;	//Cantidad maxima permitida de apuestas.
 
 
-	double benchWallet = 100000;        //Monto con el que empieza la banca.
+	double benchWallet = 100000;	//Monto con el que empieza la banca.
 	int card, players, rounds, currentCard;
 	double benchPoints, bet, maxBet;
 	bool option, secondCardPopped;
@@ -78,13 +78,16 @@ int main() {
 
 			playersBet[playerNumber] = bet;
 
-
+			//Le restamos a la billetera del jugador el monto apostado, y mostramos su saldo.
 			playersWallet[playerNumber] = playersWallet[playerNumber] - bet;
 			printf("\t(Saldo %.2f)", playersWallet[playerNumber]);
 			printf("\nPuntaje de la carta: %lf", playerPoints[playerNumber]);
 
+			//Repartimos la segunda carta luego de realizar la apuesta.
 			secondCardPopped = true;
 			playerGainRatio[playerNumber] = 1; // Valor por defecto en caso de que no gane.
+
+			//Preguntamos si quiere otra carta y evaluamos su puntaje total.
 			do {
 				option = getUserInputAsBool("\nDesea pedir otra carta?");
 				if (option) {
@@ -92,7 +95,7 @@ int main() {
 					playerPoints[playerNumber] += getCardPoints(currentCard);
 					printf("\nCarta recibida: %s", getCardString(currentCard));
 
-					// Reglas para 2 cartas unicamente
+					//Analisis con 2 cartas.
 					if (secondCardPopped) {
 						secondCardPopped = false;
 
@@ -120,7 +123,7 @@ int main() {
 							break;
 						}
 					}
-					//Reglas para 3 o mas cartas, en caso de que llegue a conseguir 7.50 puntos exactamente
+					//Analisis con 3 o mas cartas, en caso de que llegue a conseguir 7.50 puntos exactamente.
 					if (playerPoints[playerNumber] == 7.5){
 						printf("\nUsted gana !");
 						playerGainRatio[playerNumber] = 1.25;
@@ -128,7 +131,7 @@ int main() {
 						break;
 					}
 
-					//Si se pasa de 7.5 pierde la apuesta
+					//Si se pasa de 7.5 pierde la apuesta.
 					if (playerPoints[playerNumber] > 7.5) {
 						printf("\nUsted pierde la ronda. Ha superado 7.5. Total de puntos: %.2f\n", playerPoints[playerNumber]);
 						printf ("\nJugador %d tiene $%.2f", playerNumber + 1, playersWallet[playerNumber]);
@@ -141,17 +144,20 @@ int main() {
 			} while (option);
 		}
 
+		//Turno de la banca.
 		printf("\n\n ***** Turno de la banca ***** ");
 		card = popCard(cardStack);
 		benchPoints = getCardPoints(card);
 		printf("\nLa banca recibe el %s", getCardString(card));
 
+		//Mientras el puntaje de la banca sea menor o igual a 5.5, pide otra carta.
 		while (benchPoints <= 5.5) {
 			card = popCard(cardStack);
 			printf("\nLa banca pide otra carta y recibe el %s.", getCardString(card));
 			benchPoints += getCardPoints(card);
 		}
 
+		//Si la banca se pasa 7.5, pierde  y ganan los jugadores que en competencia.
 		if (benchPoints > 7.5) {
 			printf("\nLa banca pierde: ha superado 7.5 puntos. Ganan los jugadores!\n");
 			for (int p = 0; p < players; p++) {
@@ -160,35 +166,38 @@ int main() {
 			}
 		}
 
+		//Si la banca tiene entre 6 y 7.5 puntos, se planta y se comparan los puntajes con los jugadores en juego.
 		else if (benchPoints >= 6 && benchPoints <= 7.5) {
 			printf("\nLa banca se planta. Ha acumulado %lf puntos.", benchPoints);
 		}
 
-		int counter1, counter2, swap_points, swap_playerNumber;
-		int playersPointsAndNumber[players][2];
+	}
 
-		for (playerNumber = 0; playerNumber < players; playerNumber++) {
-			playersPointsAndNumber[playerNumber][0] = playerPoints[playerNumber];// aca van los puntos
-			playersPointsAndNumber[playerNumber][1] = playerNumber; // aca van el nro de jugador
-		}
+	int counter1, counter2, swap_points, swap_playerNumber;
+	int playersPointsAndNumber[players][2];
 
-		//Algoritmo de ordenamiento "Metodo Burbuja"
-		for (counter1 = 0; counter1 < players - 1; counter1++) {
-			for (counter2 = 0; counter2 < players - counter1 - 1; counter2++) {
-				if (playersPointsAndNumber[counter2][0] > playersPointsAndNumber[counter2 + 1][0]) {
-					swap_points = playersPointsAndNumber[counter2][0];
-					swap_playerNumber = playersPointsAndNumber[counter2][1];
-					playersPointsAndNumber[counter2][0] = playersPointsAndNumber[counter2 + 1][0];
-					playersPointsAndNumber[counter2][1] = playersPointsAndNumber[counter2 + 1][1];
-					playersPointsAndNumber[counter2 + 1][0] = swap_points;
-					playersPointsAndNumber[counter2 + 1][1] = swap_playerNumber;
-				}
+	for (playerNumber = 0; playerNumber < players; playerNumber++) {
+		playersPointsAndNumber[playerNumber][0] = playerPoints[playerNumber];// aca van los puntos
+		playersPointsAndNumber[playerNumber][1] = playerNumber; // aca van el nro de jugador
+	}
+
+	//Algoritmo de ordenamiento "Metodo Burbuja" para ordenar los puntajes de los jugadores.
+	for (counter1 = 0; counter1 < players - 1; counter1++) {
+		for (counter2 = 0; counter2 < players - counter1 - 1; counter2++) {
+			if (playersPointsAndNumber[counter2][0] > playersPointsAndNumber[counter2 + 1][0]) {
+				swap_points = playersPointsAndNumber[counter2][0];
+				swap_playerNumber = playersPointsAndNumber[counter2][1];
+				playersPointsAndNumber[counter2][0] = playersPointsAndNumber[counter2 + 1][0];
+				playersPointsAndNumber[counter2][1] = playersPointsAndNumber[counter2 + 1][1];
+				playersPointsAndNumber[counter2 + 1][0] = swap_points;
+				playersPointsAndNumber[counter2 + 1][1] = swap_playerNumber;
 			}
 		}
+	}
 
-		//Comparar la banca contra la primera posicion. Si gana la banca se finaliza la ronda.
-		//Si esto no pasa, se compara el primero con el segundo para ver si hay empate.
-		//Si no hay empate, gana el primero. Sino, se compara el puntaje del segundo contra el tercero para ver si no hubo un empate triple.
+	//Comparar la banca contra la primera posicion. Si gana la banca se finaliza la ronda.
+	//Si esto no pasa, se compara el primero con el segundo para ver si hay empate.
+	//Si no hay empate, gana el primero. Sino, se compara el puntaje del segundo contra el tercero para ver si no hubo un empate triple.
 
 	return 0;
 }
