@@ -17,7 +17,6 @@ int main() {
 	double benchPoints, bet, maxBet;
 	bool option, secondCardPopped;
 
-
 	printf("\n##################################");
 	printf("\nBienvenido al juego Siete y Medio");
 	printf("\n##################################\n");
@@ -32,7 +31,9 @@ int main() {
 	double playersBet[players];	//Array que contiene la apuesta que hace cada jugador por ronda.
 	double playerGainRatio[players];//Array que contiene el porcentaje de ganancia por sobre la apuesta.
 
-	int playerNumber; //Variable para saber el numero del jugador.
+	int playerNumber;	//Variable para saber el numero del jugador.
+	bool isPlayerOut = false;	//Variable para comprobar si un jugador queda afuera o no.
+	int playersOut[players];
 
 	//Le asignamos a cada jugador su monto inicial ($5000).
 	for (playerNumber = 0; playerNumber < players; playerNumber++) {
@@ -50,7 +51,7 @@ int main() {
 
 		printf("\n\t========");
 		printf("\n\tRonda %d\n", roundNumber);
-		printf("\t========");
+		printf("\t========\n");
 
 		//Turno de cada uno de los jugadores en la ronda.
 		for (playerNumber = 0; playerNumber < players ; playerNumber++) {
@@ -81,11 +82,13 @@ int main() {
 			//Le restamos a la billetera del jugador el monto apostado, y mostramos su saldo.
 			playersWallet[playerNumber] = playersWallet[playerNumber] - bet;
 			printf("\t(Saldo %.2f)", playersWallet[playerNumber]);
-			printf("\nPuntaje de la carta: %lf", playerPoints[playerNumber]);
+			printf("\nPuntaje de la carta: %.2f", playerPoints[playerNumber]);
 
-			//Repartimos la segunda carta luego de realizar la apuesta.
 			secondCardPopped = true;
 			playerGainRatio[playerNumber] = 1; // Valor por defecto en caso de que no gane.
+
+			isPlayerOut = false;
+			playersOut[playerNumber] = 0;
 
 			//Preguntamos si quiere otra carta y evaluamos su puntaje total.
 			do {
@@ -135,17 +138,22 @@ int main() {
 					if (playerPoints[playerNumber] > 7.5) {
 						printf("\nUsted pierde la ronda. Ha superado 7.5. Total de puntos: %.2f\n", playerPoints[playerNumber]);
 						printf ("\nJugador %d tiene $%.2f", playerNumber + 1, playersWallet[playerNumber]);
+						isPlayerOut = true;
+						if(isPlayerOut) {
+							playersOut[playerNumber] = playerNumber + 1;
+						}
 						benchWallet += bet;
 						break;
 					}
 
+					playersWallet[playerNumber] = playersWallet[playerNumber] * playerGainRatio[playerNumber];
 					printf ("\nJugador %d tiene %.2f puntos", playerNumber + 1, playerPoints[playerNumber]);
 				}
 			} while (option);
 		}
 
 		//Turno de la banca.
-		printf("\n\n ***** Turno de la banca ***** ");
+		printf("\n\n ***** Turno de la banca *****\n");
 		card = popCard(cardStack);
 		benchPoints = getCardPoints(card);
 		printf("\nLa banca recibe el %s", getCardString(card));
@@ -157,42 +165,48 @@ int main() {
 			benchPoints += getCardPoints(card);
 		}
 
-		//Si la banca se pasa 7.5, pierde  y ganan los jugadores que en competencia.
+		//Si la banca se pasa 7.5, pierde y ganan los jugadores en competencia.
 		if (benchPoints > 7.5) {
 			printf("\nLa banca pierde: ha superado 7.5 puntos. Ganan los jugadores!\n");
 			for (int p = 0; p < players; p++) {
-				playersWallet[p] += playersBet[p];
-				break;
+				if(playersOut[p] == 0) {
+					playersWallet[p] += playersBet[p];
+					playerGainRatio[p] = 1;
+				}
 			}
 		}
 
 		//Si la banca tiene entre 6 y 7.5 puntos, se planta y se comparan los puntajes con los jugadores en juego.
 		else if (benchPoints >= 6 && benchPoints <= 7.5) {
-			printf("\nLa banca se planta. Ha acumulado %lf puntos.", benchPoints);
-		}
+			printf("\nLa banca se planta. Ha acumulado %.2f puntos.\n", benchPoints);
+			int counter1, counter2, swap_points, swap_playerNumber;
+			int playersPointsAndNumber[players][2];
 
-	}
+			for (playerNumber = 0; playerNumber < players; playerNumber++) {
+				playersPointsAndNumber[playerNumber][0] = playerPoints[playerNumber];// aca van los puntos
+				playersPointsAndNumber[playerNumber][1] = playerNumber; // aca van el nro de jugador
+			}
 
-	int counter1, counter2, swap_points, swap_playerNumber;
-	int playersPointsAndNumber[players][2];
-
-	for (playerNumber = 0; playerNumber < players; playerNumber++) {
-		playersPointsAndNumber[playerNumber][0] = playerPoints[playerNumber];// aca van los puntos
-		playersPointsAndNumber[playerNumber][1] = playerNumber; // aca van el nro de jugador
-	}
-
-	//Algoritmo de ordenamiento "Metodo Burbuja" para ordenar los puntajes de los jugadores.
-	for (counter1 = 0; counter1 < players - 1; counter1++) {
-		for (counter2 = 0; counter2 < players - counter1 - 1; counter2++) {
-			if (playersPointsAndNumber[counter2][0] > playersPointsAndNumber[counter2 + 1][0]) {
-				swap_points = playersPointsAndNumber[counter2][0];
-				swap_playerNumber = playersPointsAndNumber[counter2][1];
-				playersPointsAndNumber[counter2][0] = playersPointsAndNumber[counter2 + 1][0];
-				playersPointsAndNumber[counter2][1] = playersPointsAndNumber[counter2 + 1][1];
-				playersPointsAndNumber[counter2 + 1][0] = swap_points;
-				playersPointsAndNumber[counter2 + 1][1] = swap_playerNumber;
+			//Algoritmo de ordenamiento "Metodo Burbuja" para ordenar los puntajes de los jugadores.
+			for (counter1 = 0; counter1 < players - 1; counter1++) {
+				for (counter2 = 0; counter2 < players - counter1 - 1; counter2++) {
+					if (playersPointsAndNumber[counter2][0] > playersPointsAndNumber[counter2 + 1][0]) {
+						swap_points = playersPointsAndNumber[counter2][0];
+						swap_playerNumber = playersPointsAndNumber[counter2][1];
+						playersPointsAndNumber[counter2][0] = playersPointsAndNumber[counter2 + 1][0];
+						playersPointsAndNumber[counter2][1] = playersPointsAndNumber[counter2 + 1][1];
+						playersPointsAndNumber[counter2 + 1][0] = swap_points;
+						playersPointsAndNumber[counter2 + 1][1] = swap_playerNumber;
+					}
+				}
 			}
 		}
+
+		printf("\n***Fin de la ronda.***\nEstadisticas:\n");
+		for(int i = 0; i < players; i++) {
+			printf("Jugador %d: %.2f puntos. Apuesta: $%.2f. Saldo: $%.2f\n", i + 1, playerPoints[i], playersBet[i], playersWallet[i]);
+		}
+		printf("Banca: %.2f puntos. Tesoro: $%.2f\n", benchPoints, benchWallet);
 	}
 
 	//Comparar la banca contra la primera posicion. Si gana la banca se finaliza la ronda.
@@ -201,5 +215,3 @@ int main() {
 
 	return 0;
 }
-
-
