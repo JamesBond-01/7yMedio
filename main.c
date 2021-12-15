@@ -231,7 +231,7 @@ int main() {
 			 * Por otro lado, si encontramos un puntaje igual al mas alto, guardamos la posicion de ambos jugadores para indicar que los dos son ganadores.
 			 */
 			for (int i = 0; i < players; i++){
-				if ((playerPoints[i] < 8) && (playerPoints[i] > benchPoints)) {
+				if ((playerPoints[i] <= 7.5) && (playerPoints[i] > benchPoints)) {
 					if (playerPoints[i] > maxScore) {
 						maxScore = playerPoints[i];
 						for (int j = 0; j < players; j++) {
@@ -300,20 +300,6 @@ int main() {
 			profitWinner = i;
 		}
 	}
-
-/*maxcardNum = 0;
-	for (int i = 0; i < 10; i++) {
-		if (cardsCount[i] > maxcardNum) {
-			maxcardNum = cardsCount[i];
-			for (int j = 0; j < 10; j++) {
-				topCards[j] = 0;
-			}
-			topCards[i] = 1;
-		} else if (cardsCount[i] == maxcardNum) {
-			topCards[i] = 1;
-		}
-	}
-*/
 
 	for (int i = 0; i < 5; i++) {
 		max = i;
