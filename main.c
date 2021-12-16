@@ -35,14 +35,14 @@ int main() {
 	rounds = getUserInputAsInt("Cantidad de rondas que dura la partida", MIN_ROUNDS, MAX_ROUNDS);
 
 	double playerPoints[players];	//Array que contiene la cantidad de puntos de cada jugador.
-	double playersWallet[players];	//Billetera donde se almacena el dinero de cada jugador.
+	double playersWallet[players];	//Array donde se almacena el dinero de cada jugador.
 	double playersBet[players];	//Array que contiene la apuesta que hace cada jugador por ronda.
-	double playerGainRatio[players];//Array que contiene el porcentaje de ganancia por sobre la apuesta.
-	double playersBalance[players];	//Array donde se guarda el playersBalance de cada jugador.
+	double playerGainRatio[players];//Array que contiene el porcentaje de ganancia sobre la apuesta.
+	double playersBalance[players];	//Array donde se guarda el balance de cada jugador.
 	double maxBetRecord[3];		//Array para guardar la mayor apuesta que se hizo en la partida, ronda y jugador.
-	bool winners[players];		//Array que contiene los ganadores en caso de que la banca se plante.
-	int cardsCount[12];		//Array para contabilizar los numeros de las cartas que salieron a lo largo de la partida.
-	int index[] = {0,1,2,3,4,5,6,7,8,9,10,11};	//Array que contiene los indices del array cardsCount[].
+	bool winners[players];		//Array que contiene los ganadores.
+	int cardsCount[13];		//Array para contabilizar los numeros de las cartas que salieron a lo largo de la partida.
+	int index[] = {0,1,2,3,4,5,6,7,8,9,10,11,12};	//Array que contiene los indices del array cardsCount[].
 
 	//Le asignamos a cada jugador su monto inicial ($5000).
 	for (playerNumber = 0; playerNumber < players; playerNumber++) {
@@ -50,7 +50,7 @@ int main() {
 	}
 
 	//Inicializamos todos los valores del array cardsCount[] en 0.
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 13; i++) {
 		cardsCount[i] = 0;
 	}
 
@@ -88,11 +88,9 @@ int main() {
 			 * Nota: las posiciones 7 y 8 del array van a ser siempre 0 ya que no existen las cartas 8 y 9.
 			 */
 			cardNum = getCardNumber(card);
-			for (int i = 0; i < 10; i++) {
-				if ((i + 1) == cardNum) {
-					cardsCount[i] = cardsCount[i] + 1;
-				}
-			}
+			cardsCount[cardNum] = cardsCount[cardNum] + 1;
+
+
 
 			//Si a un jugador le queda menos dinero que el minimo que se puede apostar, no puede jugar mas.
 			if (playersWallet[playerNumber] < MIN_BET) {
@@ -155,11 +153,8 @@ int main() {
 
 					//Realizo conteo con la carta que salio.
 					cardNum = getCardNumber(currentCard);
-					for (int i = 0; i < 10; i++) {
-						if ((i + 1) == cardNum) {
-							cardsCount[i] = cardsCount[i] + 1;
-						}
-					}
+					cardsCount[cardNum] = cardsCount[cardNum] + 1;
+
 					//Analizo si llego a 7.5 con solo dos cartas.
 					if (secondCardPopped) {
 						secondCardPopped = false;
@@ -205,11 +200,8 @@ int main() {
 		printf("\nTurno de la banca");
 		card = popCard(cardStack);	//Saco una carta.
 		cardNum = getCardNumber(card);	//Tomo su valor numerico y lo sumo al contador de cartas.
-		for (int i = 0; i < 10; i++) {
-			if ((i + 1) == cardNum) {
-				cardsCount[i] = cardsCount[i] + 1;
-			}
-		}
+		cardsCount[cardNum] = cardsCount[cardNum] + 1;
+
 		benchPoints = getCardPoints(card);	//Sumo el puntaje de la carta al puntaje de la banca.
 		printf("\n\tLa banca recibe el %s", getCardString(card));
 
@@ -220,12 +212,7 @@ int main() {
 			benchPoints += getCardPoints(card);	//Sumo el puntaje de la carta a la banca.
 			printf("Puntos acumulados: %.2f", benchPoints);
 			cardNum = getCardNumber(card);
-			//Realizo conteo con la nueva carta
-			for (int i = 0; i < 10; i++) {
-				if ((i + 1) == cardNum) {
-					cardsCount[i] = cardsCount[i] + 1;
-				}
-			}
+			cardsCount[cardNum] = cardsCount[cardNum] + 1;	//Realizo conteo con la nueva carta
 		}
 		//La banca gana.
 		if (benchPoints == 7.5) {	//Si la banca gana con 7.5, todos los jugadores pierden sus apuestas independientemente de sus respectivos puntajes.
@@ -329,9 +316,11 @@ int main() {
 	 */
 	for(int i = 0; i < players; i++) {
 		totalBalance = totalBalance + (playersWallet[i] - 5000);
-		if ((playersWallet[i] - 5000) > maxProfit) {
-			maxProfit = playersWallet[i] - 5000;
-			profitWinner = i;
+		if (totalBalance != 0) {
+			if ((playersWallet[i] - 5000) > maxProfit) {
+				maxProfit = playersWallet[i] - 5000;
+				profitWinner = i;
+			}
 		}
 	}
 
@@ -343,9 +332,9 @@ int main() {
 	 *
 	 * Repetimos el proceso como tantas cartas queremos ordenar. En nuestro caso, 5 veces.
 	 */
-	for (int i = 0; i < 5; i++) {
+	for (int i = 1; i <= 5; i++) {
 		max = i;
-		for (int j = i + 1; j < 10; j++) {
+		for (int j = i + 1; j < 13; j++) {
 			if (cardsCount[j] > cardsCount[max]) {
 				max = j;	//Si en cardsCount[i+1] encontramos un valor mayor a cardsCount[i], le asignamos a max ese nuevo valor.
 			}
@@ -373,30 +362,35 @@ int main() {
 	printf("\n\t-Jugadores que perdieron por pasarse de 7.5: %d", playersOut);
 
 	//Mostramos el participante (sea jugador o banca) que mas dinero gano a lo largo de la partida.
-	if ((benchWallet - 100000) > maxProfit) {	//Comparamos si la ganancia de la banca es mayor a la del jugador que mas gano.
-		printf("\n\t-La banca gano mas dinero con un total de $%.2f en ganancias.", (benchWallet - 100000));
+	if (totalBalance != 0) {
+		if ((benchWallet - 100000) > maxProfit) {	//Comparamos si la ganancia de la banca es mayor a la del jugador que mas gano.
+			printf("\n\t-La banca gano mas dinero con un total de $%.2f en ganancias.", (benchWallet - 100000));
+		} else {
+			printf("\n\t-El jugador %d gano mas dinero con un total de $%.2f en ganancias.", (profitWinner + 1), maxProfit);
+		}
 	} else {
-		printf("\n\t-El jugador %d gano mas dinero con un total de $%.2f en ganancias.", (profitWinner + 1), maxProfit);
+		printf("\n\t-No hubo ganadores en esta partida.");
 	}
 
 	//Mostramos el balance general de los jugadores.
 	printf("\n\t-Balance general del conjunto de jugadores: $%.2f. ", totalBalance);
 	if (totalBalance < 0) {	//Si el balance general es un numero negativo, significa que hubo mas perdidas que ganancias.
 		printf("Fueron mas perdidas que ganancias.");
-	} else {
+	} else if (totalBalance > 0) {
 		printf("Fueron mas ganancias que perdidas.");
+	} else {
+		printf("No hubo ganancias en esta partida.");
 	}
-
 	//Mostramos la apuesta maxima realizada junto con su jugador y ronda.
 	printf("\n\t-La apuesta maxima la realizo el jugador %0.f en la ronda %0.f con un monto total de $%2.f.", maxBetRecord[1], maxBetRecord[2], maxBetRecord[0]);
 
 	//Mostramos el top 5 de los numeros de cartas que mas salieron en la partida.
 	printf("\n\t-El top 5 de los numeros de las cartas que mas salieron son:\n");
-	for (int i = 0; i < 5; i++) {
+	for (int i = 1; i <= 5; i++) {
 		if (cardsCount[i] > 1) {
-			printf("\t\t%d - Carta %d: %d veces.\n", i + 1, index[i] + 1, cardsCount[i]);
+			printf("\t\t%d - Carta %d: %d veces.\n", i, index[i], cardsCount[i]);
 		} else {
-			printf("\t\t%d - Carta %d: %d vez.\n", i + 1, index[i] + 1, cardsCount[i]);
+			printf("\t\t%d - Carta %d: %d vez.\n", i, index[i], cardsCount[i]);
 		}
 	}
 	return 0;

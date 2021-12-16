@@ -24,7 +24,7 @@ int getUserInputAsInt(char *userQuestion, int min, int max){
 	while (true) {
 		printf("%s [%d - %d]: ", userQuestion, min, max);
 		scanf("%i", &userInput);	//Guardamos la respuesta del usuario en userInput.
-		while ((buffer = getchar()) != '\n' ? buffer != EOF : false); //Realizamos una limpieza del buffer.
+		while ((buffer =  getchar()) != '\n' ? buffer != EOF : false); //Realizamos una limpieza del buffer.
 
 		//Si userInput no se encuentra entre los parametros correctos, enviamos un mensaje de error.
 		if (userInput < min || userInput > max) {
@@ -43,7 +43,7 @@ double getUserInputAsDouble(char *userQuestion, double min, double max){
 	while (true) {
 		printf("%s [%.2f - %.2f]: ", userQuestion, min, max);
 		scanf("%lf", &userInput);	//Guardamos la respuesta del usuario en userInput.
-		while ((buffer = getchar()) != '\n' ? buffer != EOF : false);	//Realizamos una limpieza del buffer.
+		while ((buffer =  getchar()) != '\n' ? buffer != EOF : false);	//Realizamos una limpieza del buffer.
 
 		//Si userInput no se encuentra entre los parametros correctos, enviamos un mensaje de error.
 		if (userInput < min || userInput > max) {
@@ -62,7 +62,7 @@ bool getUserInputAsBool(char *userQuestion) {
 	while (true) {
 		printf("%s [s/n]: ", userQuestion);
 		scanf("%c", &userInput);	//Guardamos la respuesta del usuario en userInput.
-		while ((buffer = getchar()) != '\n' ? buffer != EOF : false);	//Realizamos una limpieza del buffer.
+		while ((buffer =  getchar()) != '\n' ? buffer != EOF : false);	//Realizamos una limpieza del buffer.
 
 		//Si userInput no contiene el caracter requerido, enviamos un mensaje de error.
 		if (userInput != 's' && userInput != 'S' && userInput != 'n' && userInput != 'N') {
